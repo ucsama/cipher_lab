@@ -12,7 +12,7 @@ class TranspositionCipher {
       grid[row][col] = text[i];
     }
 
-    // Determine column order based on key
+    // Determine column order based on key/ss
     final List<int> colOrder = _getKeyOrder(key);
 
     // Read columns by order and build encrypted string
