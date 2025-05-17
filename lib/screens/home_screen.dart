@@ -4,6 +4,7 @@ import 'package:cipher_lab/screens/affine_cipher.dart';
 import 'package:cipher_lab/screens/rsa_screen.dart';
 import 'package:cipher_lab/screens/transpostion_screen.dart';
 import 'package:cipher_lab/screens/vernam_screen.dart';
+import 'package:get/get.dart';
 import 'caesar_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -55,9 +56,10 @@ class HomeScreen extends StatelessWidget {
                   tools.map((tool) {
                     return GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => tool['screen']),
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => tool['screen'],
+                          ),
                         );
                       },
                       child: Card(
