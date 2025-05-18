@@ -5,7 +5,6 @@ import 'package:cipher_lab/screens/affine_cipher.dart';
 import 'package:cipher_lab/screens/rsa_screen.dart';
 import 'package:cipher_lab/screens/transpostion_screen.dart';
 import 'package:cipher_lab/screens/vernam_screen.dart';
-import 'package:get/get.dart';
 import 'caesar_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -60,9 +59,9 @@ class HomeScreen extends StatelessWidget {
             final isWide = constraints.maxWidth > 600;
             return GridView.count(
               crossAxisCount: isWide ? 3 : 1,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 3,
+              mainAxisSpacing: 20,
+              crossAxisSpacing: 20,
+              childAspectRatio: 3.5,
               children:
                   tools.map((tool) {
                     return GestureDetector(
@@ -74,18 +73,22 @@ class HomeScreen extends StatelessWidget {
                         );
                       },
                       child: Card(
-                        elevation: 6,
+                        elevation: 8,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                        color: Colors.indigo[50],
+                        color: Colors.white,
+                        shadowColor: Colors.indigo.withOpacity(0.4),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16.0,
+                            vertical: 8,
+                          ),
                           child: Row(
                             children: [
                               Icon(
                                 tool['icon'],
-                                size: 36,
+                                size: 40,
                                 color: Colors.indigo,
                               ),
                               SizedBox(width: 20),
@@ -94,7 +97,7 @@ class HomeScreen extends StatelessWidget {
                                   tool['title'],
                                   style: TextStyle(
                                     fontSize: 18,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w600,
                                     color: Colors.indigo[900],
                                   ),
                                 ),

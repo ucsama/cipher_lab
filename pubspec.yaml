@@ -39,6 +39,7 @@ dependencies:
   get: ^4.7.2
   openpgp: ^3.10.4
   url_launcher: ^6.1.7
+  slide_to_act: ^2.0.0
 
 
 dev_dependencies:

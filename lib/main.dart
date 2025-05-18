@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart';
+import 'screens/welcome_screen.dart';
 
 void main() {
   runApp(CipherLabApp());
@@ -13,8 +13,10 @@ class CipherLabApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
+        scaffoldBackgroundColor: Colors.indigo[50],
       ),
-      home: HomeScreen(),
+      home: WelcomeScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
