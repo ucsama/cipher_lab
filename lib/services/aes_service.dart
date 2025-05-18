@@ -1,12 +1,10 @@
+import 'dart:convert';
 import 'package:encrypt/encrypt.dart';
 
 class AESService {
   final Key key;
-  final IV iv;
 
-  AESService(String keyString)
-    : key = Key.fromUtf8(_formatKey(keyString)),
-      iv = IV.fromLength(16); // Using fixed IV length 16 for simplicity
+  AESService(String keyString) : key = Key.fromUtf8(_formatKey(keyString));
 
   // Pad or trim the key to 32 bytes (AES-256)
   static String _formatKey(String key) {
@@ -14,15 +12,29 @@ class AESService {
     return key.padRight(32, '0');
   }
 
+  /// Encrypts the plainText using AES-256 with a random IV
+  /// Returns base64 string: IV + ciphertext
   String encrypt(String plainText) {
-    final encrypter = Encrypter(AES(key));
+    final iv = IV.fromSecureRandom(16); // Random 16-byte IV
+    final encrypter = Encrypter(AES(key, mode: AESMode.cbc)); // CBC mode
     final encrypted = encrypter.encrypt(plainText, iv: iv);
-    return encrypted.base64;
+
+    // Combine IV + CipherText in base64
+    final combinedBytes = iv.bytes + encrypted.bytes;
+    return base64Encode(combinedBytes);
   }
 
-  String decrypt(String cipherText) {
-    final encrypter = Encrypter(AES(key));
-    final decrypted = encrypter.decrypt64(cipherText, iv: iv);
+  /// Decrypts the base64 (IV + ciphertext) string back to plainText
+  String decrypt(String combinedBase64) {
+    final combinedBytes = base64Decode(combinedBase64);
+
+    // Extract IV (first 16 bytes) and ciphertext
+    final iv = IV(combinedBytes.sublist(0, 16));
+    final cipherBytes = combinedBytes.sublist(16);
+
+    final encrypter = Encrypter(AES(key, mode: AESMode.cbc));
+    final decrypted = encrypter.decrypt(Encrypted(cipherBytes), iv: iv);
+
     return decrypted;
   }
 }

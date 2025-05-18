@@ -1,33 +1,28 @@
 class VernamCipher {
-  static String encrypt(String plaintext, String key) {
-    plaintext = plaintext.toUpperCase();
-    key = key.toUpperCase();
-
-    if (!_isValid(plaintext) || !_isValid(key)) {
-      return 'Error: Only letters A-Z are allowed.';
-    }
-
+  static List<int> encrypt(String plaintext, String key) {
     if (plaintext.length != key.length) {
-      return 'Error: Plaintext and key must be the same length.';
+      throw ArgumentError('Plaintext and key must be the same length.');
     }
 
-    return _xorStrings(plaintext, key);
-  }
-
-  static String decrypt(String ciphertext, String key) {
-    return encrypt(ciphertext, key); // Same operation as XOR
-  }
-
-  static String _xorStrings(String a, String b) {
     List<int> result = [];
-    for (int i = 0; i < a.length; i++) {
-      int xored = (a.codeUnitAt(i) - 65) ^ (b.codeUnitAt(i) - 65);
-      result.add((xored % 26) + 65); // Keep it in A-Z range
+    for (int i = 0; i < plaintext.length; i++) {
+      int p = plaintext.codeUnitAt(i);
+      int k = key.codeUnitAt(i);
+      result.add(p ^ k); // XOR using full ASCII
     }
-    return String.fromCharCodes(result);
+    return result; // Return list of int values
   }
 
-  static bool _isValid(String s) {
-    return RegExp(r'^[A-Z]+$').hasMatch(s);
+  static String decrypt(List<int> ciphertext, String key) {
+    if (ciphertext.length != key.length) {
+      throw ArgumentError('Ciphertext and key must be the same length.');
+    }
+
+    List<int> result = [];
+    for (int i = 0; i < ciphertext.length; i++) {
+      int k = key.codeUnitAt(i);
+      result.add(ciphertext[i] ^ k); // XOR again to decrypt
+    }
+    return String.fromCharCodes(result); // Convert back to text
   }
 }

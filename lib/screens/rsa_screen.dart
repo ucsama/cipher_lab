@@ -42,8 +42,17 @@ class _RSAScreenState extends State<RSAScreen> {
   void _encrypt() {
     if (_keyPair == null) return;
     final text = _plainController.text.trim();
-    if (text.isEmpty || text.codeUnits.any((c) => c > 255)) {
-      setState(() => _encrypted = '❌ Only basic ASCII supported.');
+    if (text.isEmpty) {
+      setState(() => _encrypted = '❌ Enter message to encrypt.');
+      return;
+    }
+
+    if (text.codeUnits.any((c) => c >= _keyPair!.n)) {
+      setState(
+        () =>
+            _encrypted =
+                '❌ Character(s) too large for current key. Try regenerating.',
+      );
       return;
     }
 

@@ -1,21 +1,26 @@
+import 'dart:math';
+
 class TranspositionCipher {
-  /// Encrypts using columnar transposition cipher
-  static String encrypt(String text, String key) {
-    final int cols = key.length;
-    final int rows = (text.length / cols).ceil();
+  /// Encrypts using columnar transposition cipher with random padding.
+  /// Returns ciphertext with the original length prefixed (e.g. '5|ciphertext')
+  static String encrypt(String plaintext, String key) {
+    final cols = key.length;
+    final rows = (plaintext.length / cols).ceil();
+    final totalLength = rows * cols;
+
+    // Pad with random letters
+    final paddedText = _padWithRandomChars(plaintext, totalLength);
 
     // Fill grid row-wise
-    final grid = List.generate(rows, (_) => List.filled(cols, ''));
-    for (int i = 0; i < text.length; i++) {
-      final row = i ~/ cols;
-      final col = i % cols;
-      grid[row][col] = text[i];
-    }
+    final grid = List.generate(
+      rows,
+      (r) => List.generate(cols, (c) => paddedText[r * cols + c]),
+    );
 
-    // Determine column order based on key/ss
-    final List<int> colOrder = _getKeyOrder(key);
+    // Get column order from numeric key
+    final colOrder = _getKeyOrder(key);
 
-    // Read columns by order and build encrypted string
+    // Read columns in order
     final encrypted = StringBuffer();
     for (final col in colOrder) {
       for (int row = 0; row < rows; row++) {
@@ -23,73 +28,56 @@ class TranspositionCipher {
       }
     }
 
-    return encrypted.toString();
+    // Add original length prefix (e.g. "5|encryptedtext")
+    return '${plaintext.length}|${encrypted.toString()}';
   }
 
-  /// Decrypts using columnar transposition cipher
-  static String decrypt(String cipher, String key) {
-    final int cols = key.length;
-    final int rows = (cipher.length / cols).ceil();
-    final List<int> colOrder = _getKeyOrder(key);
+  /// Decrypts the transposition cipher with random padding and length prefix.
+  static String decrypt(String fullCiphertext, String key) {
+    // Split out length prefix
+    final separatorIndex = fullCiphertext.indexOf('|');
+    final length = int.parse(fullCiphertext.substring(0, separatorIndex));
+    final ciphertext = fullCiphertext.substring(separatorIndex + 1);
 
-    // Prepare empty grid
+    final cols = key.length;
+    final rows = (ciphertext.length / cols).ceil();
+
+    final colOrder = _getKeyOrder(key);
+
+    // Fill grid column-wise using order
     final grid = List.generate(rows, (_) => List.filled(cols, ''));
-
-    // Calculate how many columns are shorter due to incomplete last row
-    final int totalCells = cols * rows;
-    final int shortCols = totalCells - cipher.length;
-
-    // Determine height of each column
-    final colHeights = List<int>.filled(cols, rows);
-    for (int i = cols - shortCols; i < cols; i++) {
-      colHeights[colOrder.indexOf(i)] = rows - 1;
-    }
-
-    // Fill ciphertext into columns in key-specified order
-    int cipherIndex = 0;
-    for (int k = 0; k < cols; k++) {
-      final currentCol = colOrder[k];
-      for (int r = 0; r < colHeights[k]; r++) {
-        if (cipherIndex < cipher.length) {
-          grid[r][currentCol] = cipher[cipherIndex++];
-        }
+    int index = 0;
+    for (final col in colOrder) {
+      for (int row = 0; row < rows; row++) {
+        grid[row][col] = ciphertext[index++];
       }
     }
 
-    // Read row-wise to reconstruct plaintext
+    // Read row-wise
     final decrypted = StringBuffer();
     for (final row in grid) {
-      decrypted.write(row.join());
+      decrypted.writeAll(row);
     }
 
-    return decrypted.toString();
+    // Return only the original message length
+    return decrypted.toString().substring(0, length);
   }
 
-  /// Converts key string like "3142" into column order [2, 0, 3, 1]
   static List<int> _getKeyOrder(String key) {
-    final indexed =
-        key
-            .split('')
-            .asMap()
-            .entries
-            .map((entry) => MapEntry(entry.key, int.parse(entry.value)))
-            .toList();
-
-    indexed.sort((a, b) => a.value.compareTo(b.value));
-    return indexed.map((entry) => entry.key).toList();
+    final entries = key.split('').asMap().entries.toList();
+    entries.sort((a, b) => int.parse(a.value).compareTo(int.parse(b.value)));
+    return entries.map((e) => e.key).toList();
   }
 
-  /// Helper function to validate key (optional but recommended)
-  static bool isValidKey(String key) {
-    if (key.isEmpty) return false;
-
-    // Check if all characters are digits
-    if (!RegExp(r'^\d+$').hasMatch(key)) return false;
-
-    // Check if key contains all numbers from 1 to N without duplicates
-    final numbers = key.split('').map(int.parse).toList();
-    final expected = List.generate(numbers.length, (i) => i + 1);
-    return numbers.toSet().length == numbers.length &&
-        numbers.every(expected.contains);
+  static String _padWithRandomChars(String text, int targetLength) {
+    final random = Random.secure();
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    final paddingLength = targetLength - text.length;
+    final padding =
+        List.generate(
+          paddingLength,
+          (_) => chars[random.nextInt(chars.length)],
+        ).join();
+    return text + padding;
   }
 }

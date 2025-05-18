@@ -1,4 +1,6 @@
+import 'package:cipher_lab/services/transposition_cipher.dart';
 import 'package:flutter/material.dart';
+// import your helper class here
 
 class TranspositionScreen extends StatefulWidget {
   @override
@@ -49,7 +51,6 @@ class _TranspositionScreenState extends State<TranspositionScreen> {
       _error = 'Key must be numeric digits only (e.g., 3142).';
       return false;
     }
-    // Key digits must be unique for columnar transposition to work
     final digits = key.split('');
     final uniqueDigits = digits.toSet();
     if (digits.length != uniqueDigits.length) {
@@ -91,7 +92,6 @@ class _TranspositionScreenState extends State<TranspositionScreen> {
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 20),
-
             TextField(
               controller: _textController,
               maxLines: null,
@@ -102,7 +102,6 @@ class _TranspositionScreenState extends State<TranspositionScreen> {
               ),
             ),
             SizedBox(height: 16),
-
             TextField(
               controller: _keyController,
               decoration: InputDecoration(
@@ -112,7 +111,6 @@ class _TranspositionScreenState extends State<TranspositionScreen> {
               ),
               keyboardType: TextInputType.number,
             ),
-
             if (_error.isNotEmpty) ...[
               SizedBox(height: 12),
               Text(
@@ -123,9 +121,7 @@ class _TranspositionScreenState extends State<TranspositionScreen> {
                 ),
               ),
             ],
-
             SizedBox(height: 20),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -147,15 +143,12 @@ class _TranspositionScreenState extends State<TranspositionScreen> {
                 ),
               ],
             ),
-
             SizedBox(height: 30),
-
             Text(
               'Result:',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             SizedBox(height: 10),
-
             Container(
               width: double.infinity,
               padding: EdgeInsets.all(12),
@@ -173,89 +166,5 @@ class _TranspositionScreenState extends State<TranspositionScreen> {
         ),
       ),
     );
-  }
-}
-
-class TranspositionCipher {
-  /// Encrypt using columnar transposition cipher
-  static String encrypt(String text, String key) {
-    int cols = key.length;
-    int rows = (text.length / cols).ceil();
-
-    // Fill grid row-wise
-    List<List<String>> grid = List.generate(rows, (_) => List.filled(cols, ''));
-
-    for (int i = 0; i < text.length; i++) {
-      int row = i ~/ cols;
-      int col = i % cols;
-      grid[row][col] = text[i];
-    }
-
-    // Determine column order from key
-    List<int> colOrder = _getKeyOrder(key);
-
-    // Read columns in order to get ciphertext
-    String encrypted = '';
-    for (int col in colOrder) {
-      for (int row = 0; row < rows; row++) {
-        encrypted += grid[row][col];
-      }
-    }
-
-    return encrypted;
-  }
-
-  /// Decrypt using columnar transposition cipher
-  static String decrypt(String cipher, String key) {
-    int cols = key.length;
-    int rows = (cipher.length / cols).ceil();
-    List<int> colOrder = _getKeyOrder(key);
-
-    // Initialize empty grid
-    List<List<String>> grid = List.generate(rows, (_) => List.filled(cols, ''));
-
-    // Determine how many cells are fully filled
-    int totalChars = cipher.length;
-
-    // Calculate column heights
-    List<int> colHeights = List.filled(cols, rows);
-    int shortCols = (cols * rows) - totalChars;
-    for (int i = cols - shortCols; i < cols; i++) {
-      colHeights[colOrder.indexOf(i)]--;
-    }
-
-    int index = 0;
-    for (int k = 0; k < cols; k++) {
-      int c = colOrder[k];
-      for (int r = 0; r < colHeights[k]; r++) {
-        if (index < cipher.length) {
-          grid[r][c] = cipher[index++];
-        }
-      }
-    }
-
-    // Read grid row-wise to get original text
-    String decrypted = '';
-    for (int r = 0; r < rows; r++) {
-      for (int c = 0; c < cols; c++) {
-        decrypted += grid[r][c];
-      }
-    }
-
-    return decrypted;
-  }
-
-  /// Converts key string like "3142" into column order like [2,0,3,1]
-  static List<int> _getKeyOrder(String key) {
-    List<MapEntry<int, int>> indexed =
-        key
-            .split('')
-            .asMap()
-            .entries
-            .map((entry) => MapEntry(entry.key, int.parse(entry.value)))
-            .toList();
-
-    indexed.sort((a, b) => a.value.compareTo(b.value));
-    return indexed.map((entry) => entry.key).toList();
   }
 }

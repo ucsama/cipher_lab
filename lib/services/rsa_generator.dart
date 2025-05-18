@@ -38,7 +38,27 @@ class RSAGenerator {
   static final _random = Random();
 
   static int _generatePrime() {
-    final primes = [101, 103, 107, 109, 113, 127, 131, 137, 139];
+    // Larger primes to ensure n > 255
+    final primes = [
+      263,
+      269,
+      271,
+      277,
+      281,
+      283,
+      293,
+      307,
+      311,
+      313,
+      317,
+      331,
+      337,
+      347,
+      349,
+      353,
+      359,
+      367,
+    ];
     return primes[_random.nextInt(primes.length)];
   }
 

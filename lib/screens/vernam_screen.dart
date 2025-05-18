@@ -14,35 +14,55 @@ class _VernamScreenState extends State<VernamScreen> {
   String? _error;
 
   void _encrypt() {
-    final text = _textController.text.trim().toUpperCase();
-    final key = _keyController.text.trim().toUpperCase();
+    final text = _textController.text;
+    final key = _keyController.text;
 
-    final result = VernamCipher.encrypt(text, key);
-    setState(() {
-      if (result.startsWith('Error')) {
-        _error = result;
-        _result = '';
-      } else {
+    try {
+      final result = VernamCipher.encrypt(text, key);
+      setState(() {
         _error = null;
-        _result = result;
-      }
-    });
+        _result = result.map((e) => e.toString()).join(' ');
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _result = '';
+      });
+    }
   }
 
   void _decrypt() {
-    final text = _textController.text.trim().toUpperCase();
-    final key = _keyController.text.trim().toUpperCase();
+    final text = _textController.text;
+    final key = _keyController.text;
 
-    final result = VernamCipher.decrypt(text, key);
-    setState(() {
-      if (result.startsWith('Error')) {
-        _error = result;
-        _result = '';
-      } else {
+    try {
+      // Convert input ciphertext from string of numbers back to List<int>
+      final ciphertext =
+          text
+              .trim()
+              .split(RegExp(r'\s+'))
+              .map((e) => int.tryParse(e) ?? -1)
+              .toList();
+
+      if (ciphertext.contains(-1)) {
+        setState(() {
+          _error = 'Invalid ciphertext format. Only numbers allowed.';
+          _result = '';
+        });
+        return;
+      }
+
+      final result = VernamCipher.decrypt(ciphertext, key);
+      setState(() {
         _error = null;
         _result = result;
-      }
-    });
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _result = '';
+      });
+    }
   }
 
   void _generateKey() {
@@ -96,7 +116,7 @@ class _VernamScreenState extends State<VernamScreen> {
             TextField(
               controller: _textController,
               decoration: InputDecoration(
-                labelText: 'Text (A-Z only)',
+                labelText: 'Text (any char)',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -104,7 +124,7 @@ class _VernamScreenState extends State<VernamScreen> {
             TextField(
               controller: _keyController,
               decoration: InputDecoration(
-                labelText: 'Key (same length as text, A-Z only)',
+                labelText: 'Key (same length as text)',
                 border: OutlineInputBorder(),
               ),
             ),
