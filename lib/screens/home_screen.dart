@@ -1,3 +1,4 @@
+import 'package:cipher_lab/screens/pgp_home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cipher_lab/screens/aes_hash_screen.dart';
 import 'package:cipher_lab/screens/affine_cipher.dart';
@@ -30,6 +31,16 @@ class HomeScreen extends StatelessWidget {
       'title': 'AES & SHA-256',
       'icon': Icons.fingerprint,
       'screen': AESHashScreen(),
+    },
+    {
+      'title': 'PGP Email - Sender',
+      'icon': Icons.send,
+      'screen': const PgpHomeScreen(isSender: true),
+    },
+    {
+      'title': 'PGP Email - Receiver',
+      'icon': Icons.mail_lock,
+      'screen': const PgpHomeScreen(isSender: false),
     },
   ];
 
